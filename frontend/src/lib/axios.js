@@ -6,17 +6,20 @@ const axiosInstance = axios.create({
 });
 
 // Intercept all requests and attach Clerk JWT token for @clerk/express authentication
+// window.Clerk is the official singleton available after Clerk initializes
 axiosInstance.interceptors.request.use(
   async (config) => {
     try {
-      if (typeof window !== "undefined" && window.Clerk && window.Clerk.session) {
-        const token = await window.Clerk.session.getToken();
+      // Try window.Clerk first (available once ClerkProvider mounts)
+      const clerkSession = window?.Clerk?.session;
+      if (clerkSession) {
+        const token = await clerkSession.getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
     } catch (error) {
-      console.error("Error retrieving Clerk token for API request:", error);
+      console.warn("Could not attach Clerk auth token:", error.message);
     }
     return config;
   },
