@@ -1,5 +1,4 @@
-// Piston API is a service for code execution
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 const PISTON_API = "https://emkc.org/api/v2/piston";
 
 const LANGUAGE_VERSIONS = {
@@ -14,6 +13,23 @@ const LANGUAGE_VERSIONS = {
  * @returns {Promise<{success:boolean, output?:string, error?: string}>}
  */
 export async function executeCode(language, code) {
+  // 1. Try Backend Code Execution API first
+  try {
+    const backendRes = await fetch(`${API_URL}/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language, code }),
+    });
+
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return data;
+    }
+  } catch (backendErr) {
+    console.warn("Backend execution endpoint error, falling back:", backendErr);
+  }
+
+  // 2. Fallback to Piston API
   try {
     const languageConfig = LANGUAGE_VERSIONS[language];
 
