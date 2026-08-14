@@ -1,9 +1,19 @@
-import vm from "vm";
-import { exec } from "child_process";
-import fs from "fs";
-import path from "path";
-import os from "os";
+// Judge0 CE — free hosted instance, no API key required
+// https://ce.judge0.com
+const JUDGE0_URL = "https://ce.judge0.com";
 
+// Judge0 language IDs
+const LANGUAGE_IDS = {
+  javascript: 63,  // Node.js 12.14.0
+  python:     71,  // Python 3.8.1
+  java:       62,  // Java 13.0.1
+};
+
+/**
+ * Executes code via Judge0 CE (no API key needed).
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export async function executeCodeController(req, res) {
   const { language, code } = req.body;
 
@@ -11,63 +21,55 @@ export async function executeCodeController(req, res) {
     return res.status(400).json({ success: false, error: "Language and code are required" });
   }
 
+  const languageId = LANGUAGE_IDS[language];
+  if (!languageId) {
+    return res.status(400).json({ success: false, error: `Unsupported language: ${language}` });
+  }
+
   try {
-    if (language === "javascript" || language === "js") {
-      const logs = [];
-      const sandbox = {
-        console: {
-          log: (...args) => logs.push(args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")),
-          error: (...args) => logs.push(args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")),
-          warn: (...args) => logs.push(args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")),
-        },
-        Array,
-        Object,
-        Math,
-        String,
-        Number,
-        Boolean,
-        Date,
-        RegExp,
-        JSON,
-        parseInt,
-        parseFloat,
-        isNaN,
-        test1: undefined,
-        test2: undefined,
-      };
+    const response = await fetch(`${JUDGE0_URL}/submissions?wait=true`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language_id: languageId,
+        source_code: code,
+        stdin: "",
+      }),
+    });
 
-      const context = vm.createContext(sandbox);
-      const script = new vm.Script(code);
-      script.runInContext(context, { timeout: 3000 });
+    if (!response.ok) {
+      return res.json({ success: false, error: `Judge0 error: ${response.status}` });
+    }
 
-      return res.json({
-        success: true,
-        output: logs.join("\n") || "No output",
-      });
-    } else if (language === "python" || language === "py") {
-      const tmpDir = os.tmpdir();
-      const filePath = path.join(tmpDir, `solution_${Date.now()}.py`);
-      fs.writeFileSync(filePath, code);
+    const data = await response.json();
 
-      exec(`python3 "${filePath}"`, { timeout: 3000 }, (error, stdout, stderr) => {
-        try { fs.unlinkSync(filePath); } catch (_) {}
+    // Compile error (e.g. Java syntax error)
+    if (data.compile_output) {
+      return res.json({ success: false, error: data.compile_output });
+    }
 
-        if (error && !stdout && stderr) {
-          return res.json({ success: false, output: stdout, error: stderr || error.message });
-        }
-        return res.json({ success: true, output: (stdout || stderr || "No output").trim() });
-      });
-    } else {
-      // Fallback for Java or other languages
+    // Runtime error
+    if (data.stderr) {
+      return res.json({ success: false, error: data.stderr });
+    }
+
+    // Status other than Accepted (3)
+    if (data.status?.id !== 3) {
       return res.json({
         success: false,
-        error: `Language ${language} execution is not enabled on server`,
+        error: data.message || data.status?.description || "Execution failed",
       });
     }
-  } catch (error) {
+
     return res.json({
+      success: true,
+      output: data.stdout || "No output",
+    });
+
+  } catch (err) {
+    return res.status(502).json({
       success: false,
-      error: error.message || "Code execution failed",
+      error: `Could not reach Judge0: ${err.message}`,
     });
   }
 }
