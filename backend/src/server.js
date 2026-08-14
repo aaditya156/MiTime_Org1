@@ -11,6 +11,7 @@ import { inngest, functions } from "./lib/inngest.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoute.js";
 import executeRoutes from "./routes/executeRoute.js";
+import problemsRoutes from "./routes/problemsRoute.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/chat", chatRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/execute", executeRoutes);
+app.use("/api/problems", problemsRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", msg: "api is up and running" });

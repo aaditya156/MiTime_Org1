@@ -2,7 +2,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
-import { PROBLEMS } from "../data/problems";
+import { useProblemBySlug } from "../hooks/useProblems";
 import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -38,13 +38,22 @@ function SessionPage() {
     isParticipant
   );
 
-  // find the problem data based on session problem title
-  const problemData = session?.problem
-    ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
+  // Convert problem title to titleSlug (e.g. "Two Sum" → "two-sum")
+  const titleSlug = session?.problem
+    ? session.problem.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
     : null;
 
+  const { data: problemData, isLoading: loadingProblem } = useProblemBySlug(titleSlug);
+
+  // Blank starter code per language
+  const STARTER_CODE = {
+    javascript: "// Write your solution here\n",
+    python:     "# Write your solution here\n",
+    java:       `public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}\n`,
+  };
+
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
+  const [code, setCode] = useState(STARTER_CODE["javascript"]);
 
   // auto-join session if user is not already a participant and not the host
   useEffect(() => {
@@ -63,19 +72,15 @@ function SessionPage() {
     if (session.status === "completed") navigate("/dashboard");
   }, [session, loadingSession, navigate]);
 
-  // update code when problem loads or changes
+  // Reset code when language changes
   useEffect(() => {
-    if (problemData?.starterCode?.[selectedLanguage]) {
-      setCode(problemData.starterCode[selectedLanguage]);
-    }
-  }, [problemData, selectedLanguage]);
+    setCode(STARTER_CODE[selectedLanguage] || "");
+  }, [selectedLanguage]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    // use problem-specific starter code
-    const starterCode = problemData?.starterCode?.[newLang] || "";
-    setCode(starterCode);
+    setCode(STARTER_CODE[newLang] || "");
     setOutput(null);
   };
 
@@ -154,20 +159,20 @@ function SessionPage() {
                   </div>
 
                   <div className="p-6 space-y-6">
-                    {/* problem desc */}
-                    {problemData?.description && (
-                      <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
-                        <h2 className="text-xl font-bold mb-4 text-base-content">Description</h2>
-                        <div className="space-y-3 text-base leading-relaxed">
-                          <p className="text-base-content/90">{problemData.description.text}</p>
-                          {problemData.description.notes?.map((note, idx) => (
-                            <p key={idx} className="text-base-content/90">
-                              {note}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  {/* Problem Description */}
+                  {loadingProblem ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2Icon className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : problemData?.descriptionHtml ? (
+                    <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
+                      <h2 className="text-xl font-bold mb-4 text-base-content">Description</h2>
+                      <div
+                        className="prose prose-sm max-w-none text-base-content/90 [&_pre]:bg-base-200 [&_pre]:p-3 [&_pre]:rounded [&_code]:text-primary"
+                        dangerouslySetInnerHTML={{ __html: problemData.descriptionHtml }}
+                      />
+                    </div>
+                  ) : null}
 
                     {/* examples section */}
                     {problemData?.examples && problemData.examples.length > 0 && (
@@ -209,20 +214,7 @@ function SessionPage() {
                       </div>
                     )}
 
-                    {/* Constraints */}
-                    {problemData?.constraints && problemData.constraints.length > 0 && (
-                      <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
-                        <h2 className="text-xl font-bold mb-4 text-base-content">Constraints</h2>
-                        <ul className="space-y-2 text-base-content/90">
-                          {problemData.constraints.map((constraint, idx) => (
-                            <li key={idx} className="flex gap-2">
-                              <span className="text-primary">•</span>
-                              <code className="text-sm">{constraint}</code>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                  {/* Constraints removed — LeetCode constraints are in the HTML description */}
                   </div>
                 </div>
               </Panel>
