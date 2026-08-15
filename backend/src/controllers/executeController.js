@@ -3,7 +3,7 @@
 const JUDGE0_URL = "https://ce.judge0.com";
 
 // Judge0 language IDs
-const LANGUAGE_IDS = {
+export const LANGUAGE_IDS = {
   javascript: 63,  // Node.js 12.14.0
   python:     71,  // Python 3.8.1
   java:       62,  // Java 13.0.1
@@ -21,12 +21,31 @@ async function runOnJudge0(languageId, sourceCode, stdin = "") {
 }
 
 /** Normalise output for display / fallback */
-function normalise(s) {
+export function normalise(s) {
   return (s || "").replace(/\r\n/g, "\n").trim();
 }
 
+function isDeepEqual(obj1, obj2) {
+  if (obj1 === obj2) return true;
+  if (typeof obj1 === "number" && typeof obj2 === "number") {
+    return Math.abs(obj1 - obj2) < 1e-5;
+  }
+  if (obj1 && obj2 && typeof obj1 === "object" && typeof obj2 === "object") {
+    if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
+    if (Array.isArray(obj1)) {
+      if (obj1.length !== obj2.length) return false;
+      return obj1.every((item, i) => isDeepEqual(item, obj2[i]));
+    }
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) return false;
+    return keys1.every((key) => Object.prototype.hasOwnProperty.call(obj2, key) && isDeepEqual(obj1[key], obj2[key]));
+  }
+  return false;
+}
+
 /** Robust comparison between actual program output and expected output */
-function compareOutput(actual, expected) {
+export function compareOutput(actual, expected) {
   if (actual === expected) return true;
   if (!actual && !expected) return true;
   if (!actual || !expected) return false;
@@ -39,10 +58,7 @@ function compareOutput(actual, expected) {
   try {
     const jsonA = JSON.parse(a);
     const jsonE = JSON.parse(e);
-    if (JSON.stringify(jsonA) === JSON.stringify(jsonE)) return true;
-    if (typeof jsonA === "number" && typeof jsonE === "number") {
-      return Math.abs(jsonA - jsonE) < 1e-5;
-    }
+    if (isDeepEqual(jsonA, jsonE)) return true;
   } catch {}
 
   // Normalized whitespace & lowercased comparison (for booleans, arrays like [0, 1] vs [0,1])
@@ -55,7 +71,7 @@ function compareOutput(actual, expected) {
 
 // ── Language Harness Builders ───────────────────────────────────────────────
 
-function buildJsHarness(userCode, metaData) {
+export function buildJsHarness(userCode, metaData) {
   const meta = typeof metaData === "string" ? JSON.parse(metaData) : metaData;
   const fnName = meta && meta.name;
   if (!fnName) return userCode;
@@ -201,7 +217,7 @@ try {
 `;
 }
 
-function buildPythonHarness(userCode, metaData) {
+export function buildPythonHarness(userCode, metaData) {
   const meta = typeof metaData === "string" ? JSON.parse(metaData) : metaData;
   const fnName = meta && meta.name;
   if (!fnName) return userCode;
@@ -353,7 +369,7 @@ function generateJavaInvocations(fnName, params, outputIndex) {
   }
 }
 
-function buildJavaHarness(userCode, metaData) {
+export function buildJavaHarness(userCode, metaData) {
   if (userCode.includes("public static void main")) {
     return userCode;
   }
@@ -492,7 +508,7 @@ public class Main {
 `;
 }
 
-function wrapCodeForExecution(language, code, metaData) {
+export function wrapCodeForExecution(language, code, metaData) {
   if (!metaData) return code;
   if (language === "javascript") return buildJsHarness(code, metaData);
   if (language === "python") return buildPythonHarness(code, metaData);

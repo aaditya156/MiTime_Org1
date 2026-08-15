@@ -14,7 +14,7 @@ const LEETCODE_HEADERS = {
 };
 
 // Built-in curated problems list as a reliable fallback when external APIs fail/block cloud IPs
-const LOCAL_PROBLEMS = [
+export const LOCAL_PROBLEMS = [
   {
     id: "two-sum",
     title: "Two Sum",
@@ -138,7 +138,7 @@ const LOCAL_PROBLEMS = [
 ];
 
 // Helper to filter local problem set
-function getFilteredLocalProblems(limit, skip, difficulty, tags) {
+export function getFilteredLocalProblems(limit, skip, difficulty, tags) {
   let filtered = [...LOCAL_PROBLEMS];
   if (difficulty) {
     filtered = filtered.filter(
@@ -332,7 +332,7 @@ async function fetchLeetCodeQuestionData(titleSlug) {
 }
 
 // Parse raw example testcases and HTML description into structured array of test cases
-function parseExamplesFromHtml(html, exampleTestcaseList = []) {
+export function parseExamplesFromHtml(html, exampleTestcaseList = []) {
   if (!html) {
     return (exampleTestcaseList || []).map((raw, i) => ({
       label: `Example ${i + 1}`,
