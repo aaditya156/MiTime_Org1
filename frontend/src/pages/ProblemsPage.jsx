@@ -66,8 +66,16 @@ function ProblemsPage() {
           <div className="flex items-center justify-center py-24">
             <Loader2Icon className="size-10 animate-spin text-primary" />
           </div>
-        ) : isError ? (
-          <div className="alert alert-error">Failed to load problems. Check your connection.</div>
+        ) : isError && problems.length === 0 ? (
+          <div className="alert alert-error">Failed to load problems. Please try refreshing.</div>
+        ) : problems.length === 0 ? (
+          <div className="text-center py-16 bg-base-100 rounded-2xl border border-base-300">
+            <Code2Icon className="size-12 text-base-content/30 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold mb-1">No problems found</h3>
+            <p className="text-sm text-base-content/60">
+              Try adjusting your search or difficulty filter.
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             {problems.map((problem) => (
@@ -113,7 +121,7 @@ function ProblemsPage() {
                 ← Previous
               </button>
               <span className="btn btn-ghost btn-sm no-animation">
-                {Math.floor(skip / PAGE_SIZE) + 1} / {Math.ceil((data?.total || 0) / PAGE_SIZE)}
+                {Math.floor(skip / PAGE_SIZE) + 1} / {Math.max(1, Math.ceil((data?.total || 0) / PAGE_SIZE))}
               </span>
               <button
                 className="btn btn-outline btn-sm"

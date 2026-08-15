@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { useProblemBySlug } from "../hooks/useProblems";
 import Navbar from "../components/Navbar";
@@ -6,11 +6,19 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import OutputPanel from "../components/OutputPanel";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import { executeCode } from "../lib/piston";
+import { PROBLEMS } from "../data/problems";
 import { Loader2Icon } from "lucide-react";
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
 
-const STARTER_CODE = {
+// Map our language selector values → LeetCode langSlugs
+const LANG_SLUG_MAP = {
+  javascript: "javascript",
+  python:     "python3",
+  java:       "java",
+};
+
+const FALLBACK_CODE = {
   javascript: "// Write your solution here\n\n",
   python:     "# Write your solution here\n\n",
   java: `public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}\n`,
@@ -22,14 +30,27 @@ function ProblemPage() {
   const { data: problem, isLoading, isError } = useProblemBySlug(id);
 
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(STARTER_CODE.javascript);
+  const [code, setCode] = useState(FALLBACK_CODE.javascript);
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+
+  // Helper: resolve the best starter code for a given language
+  const getStarterCode = (lang, snippets) => {
+    const slug = LANG_SLUG_MAP[lang];
+    return (snippets && slug && snippets[slug]) || FALLBACK_CODE[lang] || "";
+  };
+
+  // When problem loads, hydrate editor with the real function signature
+  useEffect(() => {
+    if (problem?.codeSnippets) {
+      setCode(getStarterCode(selectedLanguage, problem.codeSnippets));
+    }
+  }, [problem]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(STARTER_CODE[newLang] || "");
+    setCode(getStarterCode(newLang, problem?.codeSnippets));
     setOutput(null);
   };
 
@@ -41,15 +62,50 @@ function ProblemPage() {
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
-    const result = await executeCode(selectedLanguage, code);
+
+    // Build test cases from LeetCode GraphQL problem data, fallback to static PROBLEMS
+    const dynamicExamples = problem?.examples;
+    const staticProblem = PROBLEMS[id];
+
+    let testCases;
+    if (dynamicExamples && dynamicExamples.length > 0) {
+      testCases = dynamicExamples.map((ex, i) => ({
+        label: ex.label || `Example ${i + 1}`,
+        input: ex.input || "",
+        rawInput: ex.rawInput || ex.input || "",
+        expected: ex.output || "",
+      }));
+    } else if (staticProblem?.examples) {
+      testCases = staticProblem.examples.map((ex, i) => ({
+        label: `Example ${i + 1}`,
+        input: ex.input ?? "",
+        expected: staticProblem.expectedOutput?.[selectedLanguage]
+          ?.split("\n")[i] ?? ex.output,
+      }));
+    }
+
+    const result = await executeCode(
+      selectedLanguage,
+      code,
+      testCases?.length ? testCases : undefined,
+      problem?.metaData
+    );
     setOutput(result);
     setIsRunning(false);
 
     if (result.success) {
       triggerConfetti();
-      toast.success("Code ran successfully!");
+      toast.success(
+        result.mode === "testcases"
+          ? `${result.passCount}/${result.totalCount} test cases passed! 🎉`
+          : "Code ran successfully!"
+      );
     } else {
-      toast.error("Code execution failed!");
+      toast.error(
+        result.mode === "testcases"
+          ? `${result.passCount}/${result.totalCount} test cases passed`
+          : "Code execution failed!"
+      );
     }
   };
 

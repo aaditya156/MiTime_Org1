@@ -26,6 +26,11 @@ export const PROBLEMS = {
         output: "[0,1]",
       },
     ],
+    testHarness: {
+      javascript: `\nconsole.log(JSON.stringify(twoSum([2,7,11,15], 9)));\nconsole.log(JSON.stringify(twoSum([3,2,4], 6)));\nconsole.log(JSON.stringify(twoSum([3,3], 6)));`,
+      python:     `\ns = Solution()\nprint(s.twoSum([2,7,11,15], 9))\nprint(s.twoSum([3,2,4], 6))\nprint(s.twoSum([3,3], 6))`,
+      java:       `\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(java.util.Arrays.toString(sol.twoSum(new int[]{2,7,11,15}, 9)));\n        System.out.println(java.util.Arrays.toString(sol.twoSum(new int[]{3,2,4}, 6)));\n        System.out.println(java.util.Arrays.toString(sol.twoSum(new int[]{3,3}, 6)));\n    }\n}`,
+    },
     constraints: [
       "2 ≤ nums.length ≤ 10⁴",
       "-10⁹ ≤ nums[i] ≤ 10⁹",
@@ -92,6 +97,11 @@ class Solution {
         output: '["h","a","n","n","a","H"]',
       },
     ],
+    testHarness: {
+      javascript: `\nlet _t1=["h","e","l","l","o"]; reverseString(_t1); console.log(JSON.stringify(_t1));\nlet _t2=["H","a","n","n","a","h"]; reverseString(_t2); console.log(JSON.stringify(_t2));`,
+      python:     `\ns = Solution()\n_t1 = ["h","e","l","l","o"]\ns.reverseString(_t1)\nprint(_t1)\n_t2 = ["H","a","n","n","a","h"]\ns.reverseString(_t2)\nprint(_t2)`,
+      java:       `\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        char[] t1 = {'h','e','l','l','o'}; sol.reverseString(t1); System.out.println(java.util.Arrays.toString(t1));\n        char[] t2 = {'H','a','n','n','a','h'}; sol.reverseString(t2); System.out.println(java.util.Arrays.toString(t2));\n    }\n}`,
+    },
     constraints: ["1 ≤ s.length ≤ 10⁵", "s[i] is a printable ascii character"],
     starterCode: {
       javascript: `function reverseString(s) {
@@ -172,6 +182,11 @@ class Solution {
           's is an empty string "" after removing non-alphanumeric characters. Since an empty string reads the same forward and backward, it is a palindrome.',
       },
     ],
+    testHarness: {
+      javascript: `\nconsole.log(isPalindrome("A man, a plan, a canal: Panama"));\nconsole.log(isPalindrome("race a car"));\nconsole.log(isPalindrome(" "));`,
+      python:     `\ns = Solution()\nprint(s.isPalindrome("A man, a plan, a canal: Panama"))\nprint(s.isPalindrome("race a car"))\nprint(s.isPalindrome(" "))`,
+      java:       `\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(sol.isPalindrome("A man, a plan, a canal: Panama"));\n        System.out.println(sol.isPalindrome("race a car"));\n        System.out.println(sol.isPalindrome(" "));\n    }\n}`,
+    },
     constraints: ["1 ≤ s.length ≤ 2 * 10⁵", "s consists only of printable ASCII characters"],
     starterCode: {
       javascript: `function isPalindrome(s) {
@@ -238,6 +253,11 @@ print(isPalindrome(" "))  # Expected: True`,
         explanation: "The subarray [5,4,-1,7,8] has the largest sum 23.",
       },
     ],
+    testHarness: {
+      javascript: `\nconsole.log(maxSubArray([-2,1,-3,4,-1,2,1,-5,4]));\nconsole.log(maxSubArray([1]));\nconsole.log(maxSubArray([5,4,-1,7,8]));`,
+      python:     `\ns = Solution()\nprint(s.maxSubArray([-2,1,-3,4,-1,2,1,-5,4]))\nprint(s.maxSubArray([1]))\nprint(s.maxSubArray([5,4,-1,7,8]))`,
+      java:       `\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(sol.maxSubArray(new int[]{-2,1,-3,4,-1,2,1,-5,4}));\n        System.out.println(sol.maxSubArray(new int[]{1}));\n        System.out.println(sol.maxSubArray(new int[]{5,4,-1,7,8}));\n    }\n}`,
+    },
     constraints: ["1 ≤ nums.length ≤ 10⁵", "-10⁴ ≤ nums[i] ≤ 10⁴"],
     starterCode: {
       javascript: `function maxSubArray(nums) {
@@ -303,6 +323,11 @@ print(maxSubArray([5,4,-1,7,8]))  # Expected: 23`,
         output: "1",
       },
     ],
+    testHarness: {
+      javascript: `\nconsole.log(maxArea([1,8,6,2,5,4,8,3,7]));\nconsole.log(maxArea([1,1]));`,
+      python:     `\ns = Solution()\nprint(s.maxArea([1,8,6,2,5,4,8,3,7]))\nprint(s.maxArea([1,1]))`,
+      java:       `\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(sol.maxArea(new int[]{1,8,6,2,5,4,8,3,7}));\n        System.out.println(sol.maxArea(new int[]{1,1}));\n    }\n}`,
+    },
     constraints: ["n == height.length", "2 ≤ n ≤ 10⁵", "0 ≤ height[i] ≤ 10⁴"],
     starterCode: {
       javascript: `function maxArea(height) {

@@ -27,7 +27,7 @@ function HomePage() {
 
             <div className="flex flex-col">
               <span className="font-black text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-mono tracking-wider">
-                Talent IQ
+                MiTime
               </span>
               <span className="text-xs text-base-content/60 font-medium -mt-1">Code Together</span>
             </div>
@@ -69,15 +69,15 @@ function HomePage() {
             {/* FEATURE PILLS */}
             <div className="flex flex-wrap gap-3">
               <div className="badge badge-lg badge-outline">
-                <CheckIcon className="size-4 text-success" />
+                <CheckIcon className="size-4 text-primary" />
                 Live Video Chat
               </div>
               <div className="badge badge-lg badge-outline">
-                <CheckIcon className="size-4 text-success" />
+                <CheckIcon className="size-4 text-primary" />
                 Code Editor
               </div>
               <div className="badge badge-lg badge-outline">
-                <CheckIcon className="size-4 text-success" />
+                <CheckIcon className="size-4 text-primary" />
                 Multi-Language
               </div>
             </div>
@@ -97,21 +97,7 @@ function HomePage() {
               </button>
             </div>
 
-            {/* STATS */}
-            <div className="stats stats-vertical lg:stats-horizontal bg-base-100 shadow-lg">
-              <div className="stat">
-                <div className="stat-value text-primary">10K+</div>
-                <div className="stat-title">Active Users</div>
-              </div>
-              <div className="stat">
-                <div className="stat-value text-secondary">50K+</div>
-                <div className="stat-title">Sessions</div>
-              </div>
-              <div className="stat">
-                <div className="stat-value text-accent">99.9%</div>
-                <div className="stat-title">Uptime</div>
-              </div>
-            </div>
+
           </div>
 
           {/* RIGHT IMAGE */}

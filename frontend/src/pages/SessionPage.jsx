@@ -10,6 +10,8 @@ import { getDifficultyBadgeClass } from "../lib/utils";
 import { Loader2Icon, LogOutIcon, PhoneOffIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
+import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
 
 import useStreamClient from "../hooks/useStreamClient";
 import { StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
@@ -45,15 +47,27 @@ function SessionPage() {
 
   const { data: problemData, isLoading: loadingProblem } = useProblemBySlug(titleSlug);
 
-  // Blank starter code per language
-  const STARTER_CODE = {
+  // Map our language selector values → LeetCode langSlugs
+  const LANG_SLUG_MAP = {
+    javascript: "javascript",
+    python:     "python3",
+    java:       "java",
+  };
+
+  const FALLBACK_CODE = {
     javascript: "// Write your solution here\n",
     python:     "# Write your solution here\n",
     java:       `public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}\n`,
   };
 
+  // Helper: resolve the best starter code for a given language
+  const getStarterCode = (lang, snippets) => {
+    const slug = LANG_SLUG_MAP[lang];
+    return (snippets && slug && snippets[slug]) || FALLBACK_CODE[lang] || "";
+  };
+
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(STARTER_CODE["javascript"]);
+  const [code, setCode] = useState(FALLBACK_CODE["javascript"]);
 
   // auto-join session if user is not already a participant and not the host
   useEffect(() => {
@@ -72,25 +86,64 @@ function SessionPage() {
     if (session.status === "completed") navigate("/dashboard");
   }, [session, loadingSession, navigate]);
 
+  // When problem loads, hydrate editor with real function signature
+  useEffect(() => {
+    if (problemData?.codeSnippets) {
+      setCode(getStarterCode(selectedLanguage, problemData.codeSnippets));
+    }
+  }, [problemData]);
+
   // Reset code when language changes
   useEffect(() => {
-    setCode(STARTER_CODE[selectedLanguage] || "");
+    setCode(getStarterCode(selectedLanguage, problemData?.codeSnippets));
   }, [selectedLanguage]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(STARTER_CODE[newLang] || "");
+    setCode(getStarterCode(newLang, problemData?.codeSnippets));
     setOutput(null);
+  };
+
+  const triggerConfetti = () => {
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.2, y: 0.6 } });
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.8, y: 0.6 } });
   };
 
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
+    const testCases = problemData?.examples?.map((ex, i) => ({
+      label: ex.label || `Example ${i + 1}`,
+      input: ex.input || "",
+      rawInput: ex.rawInput || ex.input || "",
+      expected: ex.output || "",
+    }));
+
+    const result = await executeCode(
+      selectedLanguage,
+      code,
+      testCases?.length ? testCases : undefined,
+      problemData?.metaData
+    );
     setOutput(result);
     setIsRunning(false);
+
+    if (result.success) {
+      triggerConfetti();
+      toast.success(
+        result.mode === "testcases"
+          ? `${result.passCount}/${result.totalCount} test cases passed! 🎉`
+          : "Code ran successfully!"
+      );
+    } else {
+      toast.error(
+        result.mode === "testcases"
+          ? `${result.passCount}/${result.totalCount} test cases passed`
+          : "Code execution failed!"
+      );
+    }
   };
 
   const handleEndSession = () => {

@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1>⚡ Talent IQ ⚡</h1>
+  <h1>⚡ MiTime ⚡</h1>
   <p><b>Next-Generation Real-Time Technical Interview & Solo Coding Platform</b></p>
 
   <p>
@@ -23,7 +23,7 @@
 
   <br />
 
-  <img src="frontend/public/hero.png" alt="Talent IQ Hero Preview" width="100%" style="border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="frontend/public/hero.png" alt="MiTime Hero Preview" width="100%" style="border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
 
 </div>
 
@@ -31,16 +31,16 @@
 
 ---
 
-## 📌 About Talent IQ
+## 📌 About MiTime
 
-**Talent IQ** is a modern, full-stack collaborative interview platform built for conducting seamless technical coding interviews and solo practice. It combines live multi-language code execution, low-latency 1-on-1 video call rooms, interactive real-time chat, and automated problem validation into a single, intuitive interface.
+**MiTime** is a modern, full-stack collaborative interview platform built for conducting seamless technical coding interviews and solo practice. It combines live multi-language code execution, low-latency 1-on-1 video call rooms, interactive real-time chat, and automated problem validation into a single, intuitive interface.
 
 ---
 
 ## 📸 Screenshots & Showcase
 
 <div align="center">
-  <img src="frontend/public/screenshot-for-readme.png" alt="Talent IQ Workspace" width="95%" style="border-radius: 8px;" />
+  <img src="frontend/public/screenshot-for-readme.png" alt="MiTime Workspace" width="95%" style="border-radius: 8px;" />
   <p><i>Live Collaborative Workspace with Video Call, Code Editor, and Execution Panel</i></p>
 </div>
 
@@ -81,7 +81,7 @@
 ## 📁 Project Structure
 
 ```text
-talent-IQ/
+mi-time/
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/      # Route logic & request handlers
@@ -116,7 +116,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-DB_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/talent-iq
+DB_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/mi-time
 
 # Background Jobs
 INNGEST_EVENT_KEY=your_inngest_event_key
@@ -154,7 +154,7 @@ VITE_API_URL=http://localhost:3000/api
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/aaditya156/MiTime_Org1.git
-cd talent-IQ
+cd mi-time
 ```
 
 ### 2. Start Backend Server
