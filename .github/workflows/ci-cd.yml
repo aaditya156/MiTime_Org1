@@ -78,12 +78,12 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Google Container Registry
-        run: gcloud auth configure-docker --quiet
+      - name: Configure Docker for Google Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
       - name: Build and Push Backend Docker Image
         run: |
-          IMAGE_NAME="gcr.io/project-40dd357d-acda-45a7-a15/talent-iq-backend"
+          IMAGE_NAME="us-central1-docker.pkg.dev/project-40dd357d-acda-45a7-a15/cloud-run-source-deploy/talent-iq-backend"
           docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest ./backend
           docker push ${IMAGE_NAME}:${{ github.sha }}
           docker push ${IMAGE_NAME}:latest
@@ -92,5 +92,5 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: talent-iq-backend
-          image: gcr.io/project-40dd357d-acda-45a7-a15/talent-iq-backend:${{ github.sha }}
+          image: us-central1-docker.pkg.dev/project-40dd357d-acda-45a7-a15/cloud-run-source-deploy/talent-iq-backend:${{ github.sha }}
           region: us-central1
