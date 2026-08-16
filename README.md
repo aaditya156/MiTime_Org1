@@ -100,7 +100,10 @@ mi-time/
 │   │   ├── pages/            # App pages (Dashboard, Room, Problems)
 │   │   └── App.jsx
 │   └── package.json
-└── GCP_DEPLOYMENT_GUIDE.md   # Cloud deployment guide
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml         # GitHub Actions CI/CD pipeline
+└── CI_CD_SETUP_GUIDE.md      # CI/CD secrets & deployment guide
 ```
 
 ---
@@ -175,10 +178,10 @@ npm run dev
 
 ---
 
-## ☁️ Deployment
-
-- **Backend**: Containerized with Docker and deployed on **Google Cloud Run**. Refer to [GCP_DEPLOYMENT_GUIDE.md](./GCP_DEPLOYMENT_GUIDE.md) for full deployment instructions.
-- **Frontend**: Deployed on **Vercel** with environment variable `VITE_API_URL` pointing to your Cloud Run service URL.
+- **CI/CD Pipeline**: Fully automated GitHub Actions workflow that runs Jest unit tests, frontend linting, and build checks on every push/PR before automatically deploying:
+  - **Backend**: Deploys container image to **Google Cloud Run**.
+  - **Frontend**: Deploys production bundle to **Vercel**.
+  - 📖 See [CI_CD_SETUP_GUIDE.md](./CI_CD_SETUP_GUIDE.md) for full configuration & secrets setup.
 
 ---
 
