@@ -33,7 +33,7 @@ function SessionPage() {
   const isHost = session?.host?.clerkId === user?.id;
   const isParticipant = session?.participant?.clerkId === user?.id;
 
-  const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
+  const { call, isInitializingCall, streamClient } = useStreamClient(
     session,
     loadingSession,
     isHost,
@@ -325,7 +325,7 @@ function SessionPage() {
                 <div className="h-full">
                   <StreamVideo client={streamClient}>
                     <StreamCall call={call}>
-                      <VideoCallUI chatClient={chatClient} channel={channel} />
+                      <VideoCallUI sessionId={session?._id || session?.callId} currentUser={user} />
                     </StreamCall>
                   </StreamVideo>
                 </div>

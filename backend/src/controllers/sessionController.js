@@ -1,7 +1,8 @@
-import { chatClient, streamClient } from "../lib/stream.js";
+import { streamClient } from "../lib/stream.js";
 import Session from "../models/Session.js";
 
 export async function createSession(req, res) {
+
   try {
     const { problem, difficulty } = req.body;
     const userId = req.user._id;
@@ -24,15 +25,6 @@ export async function createSession(req, res) {
         custom: { problem, difficulty, sessionId: session._id.toString() },
       },
     });
-
-    // chat messaging
-    const channel = chatClient.channel("messaging", callId, {
-      name: `${problem} Session`,
-      created_by_id: clerkId,
-      members: [clerkId],
-    });
-
-    await channel.create();
 
     res.status(201).json({ session });
   } catch (error) {
@@ -116,9 +108,6 @@ export async function joinSession(req, res) {
     session.participant = userId;
     await session.save();
 
-    const channel = chatClient.channel("messaging", session.callId);
-    await channel.addMembers([clerkId]);
-
     res.status(200).json({ session });
   } catch (error) {
     console.log("Error in joinSession controller:", error.message);
@@ -148,10 +137,6 @@ export async function endSession(req, res) {
     // delete stream video call
     const call = streamClient.video.call("default", session.callId);
     await call.delete({ hard: true });
-
-    // delete stream chat channel
-    const channel = chatClient.channel("messaging", session.callId);
-    await channel.delete();
 
     session.status = "completed";
     await session.save();

@@ -1,3 +1,4 @@
+import http from "http";
 import express from "express";
 import path from "path";
 import cors from "cors";
@@ -7,6 +8,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
 import { inngest, functions } from "./lib/inngest.js";
+import { initializeSocket } from "./lib/socket.js";
 
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoute.js";
@@ -14,6 +16,10 @@ import executeRoutes from "./routes/executeRoute.js";
 import problemsRoutes from "./routes/problemsRoute.js";
 
 const app = express();
+const httpServer = http.createServer(app);
+
+// Initialize Socket.io
+initializeSocket(httpServer);
 
 const __dirname = path.resolve();
 
@@ -36,10 +42,11 @@ app.get("/health", (req, res) => {
 
 
 const startServer = () => {
-  app.listen(ENV.PORT, () => {
+  httpServer.listen(ENV.PORT, () => {
     console.log("Server is running on port:", ENV.PORT);
     connectDB();
   });
 };
 
 startServer();
+
